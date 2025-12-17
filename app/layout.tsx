@@ -63,7 +63,7 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
     >
-      <head>
+      <head suppressHydrationWarning>
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
           dangerouslySetInnerHTML={{
