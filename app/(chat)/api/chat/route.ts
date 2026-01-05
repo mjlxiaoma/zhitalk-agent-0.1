@@ -128,7 +128,7 @@ export async function POST(request: Request) {
     const chat = await getChatById({ id });
     let messagesFromDb: DBMessage[] = [];
 
-    if (chat) {
+    if (chat) { // 查询当前聊天记录是否存在，如果不存在就生成一个title并创建一个聊天记录
       if (chat.userId !== session.user.id) {
         return new ChatSDKError("forbidden:chat").toResponse();
       }
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
         message,
       });
 
-      await saveChat({
+      await saveChat({  // 往数据表中插入一行数据
         id,
         userId: session.user.id,
         title,
@@ -331,7 +331,7 @@ export async function DELETE(request: Request) {
     return new ChatSDKError("forbidden:chat").toResponse();
   }
 
-  const deletedChat = await deleteChatById({ id });
+  const deletedChat = await deleteChatById({ id }); // 删除某条记录
 
   return Response.json(deletedChat, { status: 200 });
 }

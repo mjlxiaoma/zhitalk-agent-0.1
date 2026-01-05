@@ -110,9 +110,9 @@ export function Chat({
       },
     }),
     onData: (dataPart) => {
-      setDataStream((ds) => (ds ? [...ds, dataPart] : []));
+      setDataStream((ds) => (ds ? [...ds, dataPart] : [])); //数据返回执行  // setDataStream 会把数据同步到 messages ，然后传入到 messages.tsx 组件中进行渲染
       if (dataPart.type === "data-usage") {
-        setUsage(dataPart.data);
+        setUsage(dataPart.data);   // 记录token用量
       }
     },
     onFinish: () => {

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     return new ChatSDKError("unauthorized:chat").toResponse();
   }
 
-  const chats = await getChatsByUserId({
+  const chats = await getChatsByUserId({ //查询当前用户聊天列表  左侧栏位
     id: session.user.id,
     limit,
     startingAfter,
