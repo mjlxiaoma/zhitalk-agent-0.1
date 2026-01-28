@@ -20,13 +20,16 @@ const systemPrompt = `你是一位互联网大厂的资深技术面试官，拥�
 export async function mockInterviewAgent({
   messages,
   model = "chat-model",
+  onFinish,
 }: {
   messages: CoreMessage[];
   model?: string;
+  onFinish?: (params: { usage: any }) => Promise<void>;
 }) {
   return streamText({
     model: myProvider.languageModel(model),
     system: systemPrompt,
     messages,
+    onFinish,
   });
 }

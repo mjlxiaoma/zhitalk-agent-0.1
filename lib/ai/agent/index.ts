@@ -75,6 +75,47 @@ const getTokenlensCatalog = cache(
 );
 
 /**
+ * 创建通用的 onFinish 处理函数
+ * 用于处理 TokenLens 使用量统计和数据流写入
+ */
+function createAgentOnFinishHandler({
+  selectedChatModel,
+  dataStream,
+  setFinalUsage,
+}: {
+  selectedChatModel: string;
+  dataStream: ReturnType<typeof createUIMessageStream> extends Promise<infer T>
+    ? never
+    : Parameters<Parameters<typeof createUIMessageStream>[0]["execute"]>[0]["writer"];
+  setFinalUsage: (usage: AppUsage) => void;
+}) {
+  return async ({ usage }: { usage: any }) => {
+    try {
+      const providers = await getTokenlensCatalog();
+      const modelId = myProvider.languageModel(selectedChatModel).modelId;
+
+      if (!modelId || !providers) {
+        setFinalUsage(usage);
+        dataStream.write({
+          type: "data-usage",
+          data: usage,
+        });
+        return;
+      }
+
+      const summary = getUsage({ modelId, usage, providers });
+      const mergedUsage = { ...usage, ...summary, modelId } as AppUsage;
+      setFinalUsage(mergedUsage);
+      dataStream.write({ type: "data-usage", data: mergedUsage });
+    } catch (err) {
+      console.warn("TokenLens enrichment failed", err);
+      setFinalUsage(usage);
+      dataStream.write({ type: "data-usage", data: usage });
+    }
+  };
+}
+
+/**
  * Create a chat stream with AI model interaction
  * 
  * This function encapsulates all AI-related logic including:
@@ -106,18 +147,29 @@ export async function createChatStream(
       // 分类用户意图
       const classification = await classifyUserIntent({ messages });
       console.log(classification,'================>classification');
-      
+
+      // 创建公共的 onFinish 处理函数
+      const agentOnFinish = createAgentOnFinishHandler({
+        selectedChatModel,
+        dataStream,
+        setFinalUsage: (usage) => {
+          finalMergedUsage = usage;
+        },
+      });
+
       let result;
 
       if (classification.resume_opt) {
         result = await resumeOptAgent({
           messages: convertToModelMessages(messages),
           model: selectedChatModel,
+          onFinish: agentOnFinish,
         });
       } else if (classification.mock_interview) {
         result = await mockInterviewAgent({
           messages: convertToModelMessages(messages),
           model: selectedChatModel,
+          onFinish: agentOnFinish,
         });
       } else {
         // 默认处理：related_topics 和 others
@@ -126,39 +178,7 @@ export async function createChatStream(
           selectedChatModel,
           session,
           dataStream,
-          onFinish: async ({ usage }) => {
-            try {
-              const providers = await getTokenlensCatalog();
-              const modelId =
-                myProvider.languageModel(selectedChatModel).modelId;
-
-              if (!modelId) {
-                finalMergedUsage = usage;
-                dataStream.write({
-                  type: "data-usage",
-                  data: finalMergedUsage,
-                });
-                return;
-              }
-
-              if (!providers) {
-                finalMergedUsage = usage;
-                dataStream.write({
-                  type: "data-usage",
-                  data: finalMergedUsage,
-                });
-                return;
-              }
-
-              const summary = getUsage({ modelId, usage, providers });
-              finalMergedUsage = { ...usage, ...summary, modelId } as AppUsage;
-              dataStream.write({ type: "data-usage", data: finalMergedUsage });
-            } catch (err) {
-              console.warn("TokenLens enrichment failed", err);
-              finalMergedUsage = usage;
-              dataStream.write({ type: "data-usage", data: finalMergedUsage });
-            }
-          },
+          onFinish: agentOnFinish,
         });
       }
 
