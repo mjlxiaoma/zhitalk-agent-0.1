@@ -188,7 +188,7 @@ function generateSuggestion(
 
   // 深度建议
   if (!depthAnalysis.hasAdvancedSkills && yearsOfExperience >= 2) {
-    suggestions.push("建议使用"熟悉"、"熟练"、"精通"等词描述技能掌握程度");
+    suggestions.push("建议使用熟悉、熟练、精通等词描述技能掌握程度");
   }
 
   // 广度建议
@@ -206,7 +206,7 @@ function generateSuggestion(
   // 格式建议
   const hasUnderstand = skills.some(s => s.includes("了解"));
   if (hasUnderstand) {
-    suggestions.push("不建议写"了解xx技术"，要么写"熟悉"，要么不写");
+    suggestions.push("不建议写了解xx技术，要么写熟悉，要么不写");
   }
 
   if (suggestions.length === 0) {
