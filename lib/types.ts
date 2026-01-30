@@ -60,3 +60,10 @@ export type Attachment = {
   base64: string;
   contentType: string;
 };
+
+export type ApiUsageSummary = {
+  used: number;
+  maxApiCalls: number;
+  userType: "guest" | "regular";
+  isAuthenticated: boolean;
+};

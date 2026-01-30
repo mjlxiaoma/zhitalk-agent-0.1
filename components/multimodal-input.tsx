@@ -22,7 +22,7 @@ import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { SelectItem } from "@/components/ui/select";
 import { chatModels } from "@/lib/ai/models";
 import type { Attachment, ChatMessage } from "@/lib/types";
-import type { AppUsage } from "@/lib/usage";
+import type { ApiUsageSummary } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Context } from "./elements/context";
 import {
@@ -61,7 +61,7 @@ function PureMultimodalInput({
   selectedVisibilityType,
   selectedModelId,
   onModelChange,
-  usage,
+  apiUsage,
 }: {
   chatId: string;
   input: string;
@@ -77,7 +77,7 @@ function PureMultimodalInput({
   selectedVisibilityType: VisibilityType;
   selectedModelId: string;
   onModelChange?: (modelId: string) => void;
-  usage?: AppUsage;
+  apiUsage?: ApiUsageSummary;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
@@ -196,9 +196,9 @@ function PureMultimodalInput({
 
   const contextProps = useMemo(
     () => ({
-      usage,
+      apiUsage,
     }),
-    [usage]
+    [apiUsage]
   );
 
   const handleFileChange = useCallback(

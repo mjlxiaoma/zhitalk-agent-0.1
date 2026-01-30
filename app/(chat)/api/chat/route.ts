@@ -9,8 +9,9 @@ import { type RequestHints } from "@/lib/ai/prompts";
 import {
   deleteChatById,
   getChatById,
-  getMessageCountByUserId,
+  getApiUsageCountByUserId,
   getMessagesByChatId,
+  recordApiUsage,
   saveChat,
   saveMessages,
   updateChatLastContextById,
@@ -55,14 +56,22 @@ export async function POST(request: Request) {
 
     const userType: UserType = session.user.type;
 
-    const messageCount = await getMessageCountByUserId({
+    const messageCount = await getApiUsageCountByUserId({
       id: session.user.id,
+      endpoint: "chat",
       differenceInHours: 24,
     });
+    console.log(messageCount,'messageCount');
+    
 
-    if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
+    if (messageCount >= entitlementsByUserType[userType].maxApiCallsPerDay) {
       return new ChatSDKError("rate_limit:chat").toResponse();
     }
+
+    await recordApiUsage({
+      userId: session.user.id,
+      endpoint: "chat",
+    });
 
     const chat = await getChatById({ id });
     let messagesFromDb: DBMessage[] = [];

@@ -23,7 +23,7 @@ import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import type { Vote } from "@/lib/db/schema";
 import { ChatSDKError } from "@/lib/errors";
 import type { Attachment, ChatMessage } from "@/lib/types";
-import type { AppUsage } from "@/lib/usage";
+import type { ApiUsageSummary } from "@/lib/types";
 import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
 import { Artifact } from "./artifact";
 import { useDataStream } from "./data-stream-provider";
@@ -40,7 +40,6 @@ export function Chat({
   initialVisibilityType,
   isReadonly,
   autoResume,
-  initialLastContext,
 }: {
   id: string;
   initialMessages: ChatMessage[];
@@ -48,7 +47,6 @@ export function Chat({
   initialVisibilityType: VisibilityType;
   isReadonly: boolean;
   autoResume: boolean;
-  initialLastContext?: AppUsage;
 }) {
   const router = useRouter();
 
@@ -72,7 +70,6 @@ export function Chat({
   const { setDataStream } = useDataStream();
 
   const [input, setInput] = useState<string>("");
-  const [usage, setUsage] = useState<AppUsage | undefined>(initialLastContext);
   const [showCreditCardAlert, setShowCreditCardAlert] = useState(false);
   const [currentModelId, setCurrentModelId] = useState(initialChatModel);
   const currentModelIdRef = useRef(currentModelId);
@@ -111,12 +108,10 @@ export function Chat({
     }),
     onData: (dataPart) => {
       setDataStream((ds) => (ds ? [...ds, dataPart] : [])); //数据返回执行  // setDataStream 会把数据同步到 messages ，然后传入到 messages.tsx 组件中进行渲染
-      if (dataPart.type === "data-usage") {
-        setUsage(dataPart.data);   // 记录token用量
-      }
     },
     onFinish: () => {
       mutate(unstable_serialize(getChatHistoryPaginationKey));
+      mutate("/api/usage");
     },
     onError: (error) => {
       if (error instanceof ChatSDKError) {
@@ -132,6 +127,7 @@ export function Chat({
           });
         }
       }
+      mutate("/api/usage");
     },
   });
 
@@ -159,6 +155,10 @@ export function Chat({
 
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
+  const { data: apiUsage } = useSWR<ApiUsageSummary>(
+    "/api/usage",
+    fetcher
+  );
 
   useAutoResume({
     autoResume,
@@ -198,13 +198,13 @@ export function Chat({
               onModelChange={setCurrentModelId}
               selectedModelId={currentModelId}
               selectedVisibilityType={visibilityType}
+              apiUsage={apiUsage}
               sendMessage={sendMessage}
               setAttachments={setAttachments}
               setInput={setInput}
               setMessages={setMessages}
               status={status}
               stop={stop}
-              usage={usage}
             />
           )}
         </div>
