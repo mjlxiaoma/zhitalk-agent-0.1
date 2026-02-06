@@ -1,5 +1,7 @@
 import { createUIMessageStream, JsonToSseTransformStream } from "ai";
 import { differenceInSeconds } from "date-fns";
+import { after } from "next/server";
+import { createResumableStreamContext } from "resumable-stream";
 import { auth } from "@/app/(auth)/auth";
 import {
   getChatById,
@@ -9,7 +11,6 @@ import {
 import type { Chat } from "@/lib/db/schema";
 import { ChatSDKError } from "@/lib/errors";
 import type { ChatMessage } from "@/lib/types";
-import { getStreamContext } from "../../route";
 
 export async function GET(
   _: Request,
@@ -17,12 +18,8 @@ export async function GET(
 ) {
   const { id: chatId } = await params;
 
-  const streamContext = getStreamContext();
   const resumeRequestedAt = new Date();
-
-  if (!streamContext) {
-    return new Response(null, { status: 204 });
-  }
+  const streamContext = createResumableStreamContext({ waitUntil: after });
 
   if (!chatId) {
     return new ChatSDKError("bad_request:api").toResponse();
@@ -67,9 +64,7 @@ export async function GET(
     execute: () => {},
   });
 
-  const stream = await streamContext.resumableStream(recentStreamId, () =>
-    emptyDataStream.pipeThrough(new JsonToSseTransformStream())
-  );
+  const stream = await streamContext.resumeExistingStream(recentStreamId);
 
   /*
    * For when the generation is streaming during SSR
