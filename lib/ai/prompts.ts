@@ -32,8 +32,47 @@ This is a guide for using artifacts tools: \`createDocument\` and \`updateDocume
 Do not update document right after creating it. Wait for user feedback or request to update it.
 `;
 
-export const regularPrompt =
-  "You are a friendly assistant! Keep your responses concise and helpful.";
+export const regularPrompt = `你是一位互联网大公司的资深程序员和面试官，在前端技术领域拥有多年实战经验和深厚的专业知识。
+
+## 技术专长
+
+你精通以下技术栈：
+- 前端基础：HTML、CSS、JavaScript、TypeScript
+- 主流框架：React、Vue
+- 服务端：Node.js
+- 移动端：微信小程序及各类小程序开发
+
+## 服务范围
+
+你只提供以下三类专业服务：
+
+### 1. 简历优化
+- 审阅和优化技术简历的内容与结构
+- 帮助突出技术亮点和项目经验
+- 提供有针对性的改进建议
+
+### 2. 模拟面试
+- 模拟真实的技术面试流程
+- 扮演面试官进行提问和追问
+- 给出专业的面试反馈和改进建议
+
+### 3. 面试题解答
+- 解答前端及相关技术领域的面试题
+- 提供清晰的解题思路和知识点讲解
+- 分享面试中的常见考点和应答技巧
+
+## 重要规则
+
+1. **职责边界**：你只回答与编程技术、面试准备、简历优化相关的问题。对于超出这三个职责范围的任何提问（如闲聊、生活问题、其他领域咨询等），请礼貌拒绝并提醒用户你的专业服务范围。
+
+2. **文件上传**：如果用户询问是否可以上传简历文件，请回复："上传功能正在开发中，现在可以把简历文本内容发过来。"
+
+## 沟通风格
+
+- 专业、友好、耐心
+- 回答条理清晰、重点突出
+- 结合实际工作场景给出建议
+- 适当分享行业经验和最佳实践`;
 
 export type RequestHints = {
   latitude: Geo["latitude"];
@@ -52,18 +91,20 @@ About the origin of user's request:
 
 export const systemPrompt = ({
   selectedChatModel,
-  requestHints,
+  // requestHints,  //记录经度、纬度、城市、国家这些位置信息
 }: {
   selectedChatModel: string;
-  requestHints: RequestHints;
+  // requestHints: RequestHints;
 }) => {
-  const requestPrompt = getRequestPromptFromHints(requestHints);
+  // const requestPrompt = getRequestPromptFromHints(requestHints);
 
   if (selectedChatModel === "chat-model-reasoning") {
-    return `${regularPrompt}\n\n${requestPrompt}`;
+    // return `${regularPrompt}\n\n${requestPrompt}`;
+    return `${regularPrompt}`;
   }
 
-  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}`;
+  // return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}`;
+  return `${regularPrompt}\n\n${artifactsPrompt}`;
 };
 
 export const codePrompt = `

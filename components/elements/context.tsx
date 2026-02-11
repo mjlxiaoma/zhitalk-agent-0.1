@@ -7,18 +7,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import type { AppUsage } from "@/lib/usage";
+import type { ApiUsageSummary } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export type ContextProps = ComponentProps<"button"> & {
-  /** Optional full usage payload to enable breakdown view */
-  usage?: AppUsage;
+  apiUsage?: ApiUsageSummary;
 };
 
-const _THOUSAND = 1000;
-const _MILLION = 1_000_000;
-const _BILLION = 1_000_000_000;
 const PERCENT_MAX = 100;
 
 // Lucide CircleIcon geometry
@@ -38,7 +33,7 @@ export const ContextIcon = ({ percent }: ContextIconProps) => {
 
   return (
     <svg
-      aria-label={`${percent.toFixed(2)}% of model context used`}
+      aria-label={`${percent.toFixed(2)}% of api calls used`}
       height="28"
       role="img"
       style={{ color: "currentcolor" }}
@@ -71,42 +66,13 @@ export const ContextIcon = ({ percent }: ContextIconProps) => {
   );
 };
 
-function InfoRow({
-  label,
-  tokens,
-  costText,
-}: {
-  label: string;
-  tokens?: number;
-  costText?: string;
-}) {
-  return (
-    <div className="flex items-center justify-between text-xs">
-      <span className="text-muted-foreground">{label}</span>
-      <div className="flex items-center gap-2 font-mono">
-        <span className="min-w-[4ch] text-right">
-          {tokens === undefined ? "—" : tokens.toLocaleString()}
-        </span>
-        {costText !== undefined &&
-          costText !== null &&
-          !Number.isNaN(Number.parseFloat(costText)) && (
-            <span className="text-muted-foreground">
-              ${Number.parseFloat(costText).toFixed(6)}
-            </span>
-          )}
-      </div>
-    </div>
-  );
-}
-
-export const Context = ({ className, usage, ...props }: ContextProps) => {
-  const used = usage?.totalTokens ?? 0;
-  const max =
-    usage?.context?.totalMax ??
-    usage?.context?.combinedMax ??
-    usage?.context?.inputMax;
+export const Context = ({ className, apiUsage, ...props }: ContextProps) => {
+  const used = apiUsage?.used;
+  const max = apiUsage?.maxApiCalls;
+  const authLabel = apiUsage?.isAuthenticated ? "注册用户" : "游客";
   const hasMax = typeof max === "number" && Number.isFinite(max) && max > 0;
-  const usedPercent = hasMax ? Math.min(100, (used / max) * 100) : 0;
+  const safeUsed = typeof used === "number" && Number.isFinite(used) ? used : 0;
+  const usedPercent = hasMax ? Math.min(100, (safeUsed / max) * 100) : 0;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -129,59 +95,18 @@ export const Context = ({ className, usage, ...props }: ContextProps) => {
       <DropdownMenuContent align="end" className="w-fit p-3" side="top">
         <div className="min-w-[240px] space-y-2">
           <div className="flex items-start justify-between text-sm">
-            <span>{usedPercent.toFixed(1)}%</span>
+            <span>{authLabel}</span>
             <span className="text-muted-foreground">
-              {hasMax ? `${used} / ${max} tokens` : `${used} tokens`}
+              {hasMax
+                ? `${safeUsed} / ${max} 次`
+                : `${safeUsed} 次`}
             </span>
           </div>
           <div className="space-y-2">
             <Progress className="h-2 bg-muted" value={usedPercent} />
           </div>
-          <div className="mt-1 space-y-1">
-            {usage?.cachedInputTokens && usage.cachedInputTokens > 0 && (
-              <InfoRow
-                costText={usage?.costUSD?.cacheReadUSD?.toString()}
-                label="Cache Hits"
-                tokens={usage?.cachedInputTokens}
-              />
-            )}
-            <InfoRow
-              costText={usage?.costUSD?.inputUSD?.toString()}
-              label="Input"
-              tokens={usage?.inputTokens}
-            />
-            <InfoRow
-              costText={usage?.costUSD?.outputUSD?.toString()}
-              label="Output"
-              tokens={usage?.outputTokens}
-            />
-            <InfoRow
-              costText={usage?.costUSD?.reasoningUSD?.toString()}
-              label="Reasoning"
-              tokens={
-                usage?.reasoningTokens && usage.reasoningTokens > 0
-                  ? usage.reasoningTokens
-                  : undefined
-              }
-            />
-            {usage?.costUSD?.totalUSD !== undefined && (
-              <>
-                <Separator className="mt-1" />
-                <div className="flex items-center justify-between pt-1 text-xs">
-                  <span className="text-muted-foreground">Total cost</span>
-                  <div className="flex items-center gap-2 font-mono">
-                    <span className="min-w-[4ch] text-right" />
-                    <span>
-                      {Number.isNaN(
-                        Number.parseFloat(usage.costUSD.totalUSD.toString())
-                      )
-                        ? "—"
-                        : `$${Number.parseFloat(usage.costUSD.totalUSD.toString()).toFixed(6)}`}
-                    </span>
-                  </div>
-                </div>
-              </>
-            )}
+          <div className="pt-1 text-xs text-muted-foreground">
+            每日调用次数
           </div>
         </div>
       </DropdownMenuContent>

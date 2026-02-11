@@ -1,6 +1,7 @@
 import type { InferUITool, UIMessage } from "ai";
 import { z } from "zod";
 import type { ArtifactKind } from "@/components/artifact";
+import type { getBehaviouralQuestions } from "./ai/tools/behavioural-questions";
 import type { createDocument } from "./ai/tools/create-document";
 import type { getWeather } from "./ai/tools/get-weather";
 import type { requestSuggestions } from "./ai/tools/request-suggestions";
@@ -22,12 +23,14 @@ type updateDocumentTool = InferUITool<ReturnType<typeof updateDocument>>;
 type requestSuggestionsTool = InferUITool<
   ReturnType<typeof requestSuggestions>
 >;
+type behaviouralQuestionsTool = InferUITool<typeof getBehaviouralQuestions>;
 
 export type ChatTools = {
   getWeather: weatherTool;
   createDocument: createDocumentTool;
   updateDocument: updateDocumentTool;
   requestSuggestions: requestSuggestionsTool;
+  getBehaviouralQuestions: behaviouralQuestionsTool;
 };
 
 export type CustomUIDataTypes = {
@@ -54,5 +57,13 @@ export type ChatMessage = UIMessage<
 export type Attachment = {
   name: string;
   url: string;
+  base64?: string;
   contentType: string;
+};
+
+export type ApiUsageSummary = {
+  used: number;
+  maxApiCalls: number;
+  userType: "guest" | "regular";
+  isAuthenticated: boolean;
 };

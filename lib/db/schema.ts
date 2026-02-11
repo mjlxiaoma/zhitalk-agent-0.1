@@ -21,6 +21,17 @@ export const user = pgTable("User", {
 
 export type User = InferSelectModel<typeof user>;
 
+export const apiUsage = pgTable("ApiUsage", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id),
+  endpoint: varchar("endpoint", { length: 64 }).notNull(),
+  createdAt: timestamp("createdAt").notNull(),
+});
+
+export type ApiUsage = InferSelectModel<typeof apiUsage>;
+
 export const chat = pgTable("Chat", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   createdAt: timestamp("createdAt").notNull(),

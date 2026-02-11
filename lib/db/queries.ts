@@ -22,6 +22,7 @@ import { generateUUID } from "../utils";
 import {
   type Chat,
   chat,
+  apiUsage,
   type DBMessage,
   document,
   message,
@@ -551,6 +552,62 @@ export async function getMessageCountByUserId({
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to get message count by user id"
+    );
+  }
+}
+
+export async function getApiUsageCountByUserId({
+  id,
+  endpoint,
+  differenceInHours,
+}: {
+  id: string;
+  endpoint: string;
+  differenceInHours: number;
+}) {
+  try {
+    const cutoff = new Date(
+      Date.now() - differenceInHours * 60 * 60 * 1000
+    );
+
+    const [stats] = await db
+      .select({ count: count(apiUsage.id) })
+      .from(apiUsage)
+      .where(
+        and(
+          eq(apiUsage.userId, id),
+          eq(apiUsage.endpoint, endpoint),
+          gte(apiUsage.createdAt, cutoff)
+        )
+      )
+      .execute();
+
+    return stats?.count ?? 0;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get api usage count by user id"
+    );
+  }
+}
+
+export async function recordApiUsage({
+  userId,
+  endpoint,
+}: {
+  userId: string;
+  endpoint: string;
+}) {
+  try {
+    return await db.insert(apiUsage).values({
+      userId,
+      endpoint,
+      createdAt: new Date(),
+    });
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to record api usage"
     );
   }
 }
