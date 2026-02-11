@@ -1,4 +1,4 @@
-import { streamText, type CoreMessage } from "ai";
+import { type CoreMessage, streamText } from "ai";
 import { myProvider } from "@/lib/ai/providers";
 import { getBehaviouralQuestions } from "@/lib/ai/tools/behavioural-questions";
 
@@ -37,7 +37,7 @@ const systemPrompt = `你是一位互联网大厂的资深技术面试官，拥�
 - 项目挑战和难点，可使用 STAR 模板来讲，这样才够清晰明了
 - 项目性能优化，最好能有具体的例子和量化指标`;
 
-export async function mockInterviewAgent({
+export function mockInterviewAgent({
   messages,
   model = "chat-model",
   onFinish,

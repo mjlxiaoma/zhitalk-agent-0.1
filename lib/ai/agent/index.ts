@@ -1,11 +1,4 @@
-import {
-  convertToModelMessages,
-  createUIMessageStream,
-} from "ai";
-import { classifyUserIntent } from "./classify";
-import { resumeOptAgent } from "./resume-opt";
-import { mockInterviewAgent } from "./mock-interview";
-import { commonAgent } from "./common";
+import { convertToModelMessages, createUIMessageStream } from "ai";
 import { unstable_cache as cache } from "next/cache";
 import type { Session } from "next-auth";
 import type { ModelCatalog } from "tokenlens/core";
@@ -17,43 +10,49 @@ import { myProvider } from "@/lib/ai/providers";
 import type { ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { generateUUID } from "@/lib/utils";
+import { classifyUserIntent } from "./classify";
+import { commonAgent } from "./common";
+import { mockInterviewAgent } from "./mock-interview";
+import { resumeOptAgent } from "./resume-opt";
+
+type AgentStreamResult =
+  | ReturnType<typeof commonAgent>
+  | ReturnType<typeof resumeOptAgent>
+  | ReturnType<typeof mockInterviewAgent>;
 
 /**
  * Options for creating a chat stream
  */
-export interface CreateChatStreamOptions {
+export type CreateChatStreamOptions = {
   /** Selected chat model ID */
   selectedChatModel: ChatModel["id"];
-  
+
   /** Complete message history including the new message */
   messages: ChatMessage[];
-  
+
   /** Authenticated user session (used for tool configuration) */
   session: Session;
-  
+
   /** Request hints (geolocation, etc.) */
   requestHints: RequestHints;
-  
+
   /** Chat ID for associating messages */
   chatId: string;
-  
+
   /** Callback when stream finishes */
-  onFinish?: (result: {
-    messages: any[];
-    usage?: AppUsage;
-  }) => Promise<void>;
-  
+  onFinish?: (result: { messages: any[]; usage?: AppUsage }) => Promise<void>;
+
   /** Callback when error occurs */
   onError?: (error: Error) => string;
-}
+};
 
 /**
  * Result of creating a chat stream
  */
-export interface CreateChatStreamResult {
+export type CreateChatStreamResult = {
   /** The UI message stream (not yet converted to SSE) */
   stream: ReadableStream;
-}
+};
 
 /**
  * Get TokenLens catalog with caching
@@ -84,9 +83,11 @@ function createAgentOnFinishHandler({
   setFinalUsage,
 }: {
   selectedChatModel: string;
-  dataStream: ReturnType<typeof createUIMessageStream> extends Promise<infer T>
+  dataStream: ReturnType<typeof createUIMessageStream> extends Promise<unknown>
     ? never
-    : Parameters<Parameters<typeof createUIMessageStream>[0]["execute"]>[0]["writer"];
+    : Parameters<
+        Parameters<typeof createUIMessageStream>[0]["execute"]
+      >[0]["writer"];
   setFinalUsage: (usage: AppUsage) => void;
 }) {
   return async ({ usage }: { usage: any }) => {
@@ -117,28 +118,20 @@ function createAgentOnFinishHandler({
 
 /**
  * Create a chat stream with AI model interaction
- * 
+ *
  * This function encapsulates all AI-related logic including:
  * - Model configuration and system prompts
  * - Tool registration and execution
  * - Stream creation and management
  * - Usage tracking and TokenLens integration
- * 
+ *
  * @param options - Configuration options for the chat stream
  * @returns A promise that resolves to the chat stream result
  */
-export async function createChatStream(
+export function createChatStream(
   options: CreateChatStreamOptions
-): Promise<CreateChatStreamResult> {
-  const {
-    selectedChatModel,
-    messages,
-    session,
-    requestHints,
-    chatId,
-    onFinish,
-    onError,
-  } = options;
+): CreateChatStreamResult {
+  const { selectedChatModel, messages, session, onFinish, onError } = options;
 
   let finalMergedUsage: AppUsage | undefined;
 
@@ -146,7 +139,7 @@ export async function createChatStream(
     execute: async ({ writer: dataStream }) => {
       // 分类用户意图
       const classification = await classifyUserIntent({ messages });
-      console.log(classification,'================>classification');
+      console.log(classification, "================>classification");
 
       // 创建公共的 onFinish 处理函数
       const agentOnFinish = createAgentOnFinishHandler({
@@ -157,7 +150,7 @@ export async function createChatStream(
         },
       });
 
-      let result;
+      let result: AgentStreamResult;
 
       if (classification.resume_opt) {
         result = await resumeOptAgent({

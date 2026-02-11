@@ -20,9 +20,9 @@ import { ChatSDKError } from "../errors";
 import type { AppUsage } from "../usage";
 import { generateUUID } from "../utils";
 import {
+  apiUsage,
   type Chat,
   chat,
-  apiUsage,
   type DBMessage,
   document,
   message,
@@ -566,9 +566,7 @@ export async function getApiUsageCountByUserId({
   differenceInHours: number;
 }) {
   try {
-    const cutoff = new Date(
-      Date.now() - differenceInHours * 60 * 60 * 1000
-    );
+    const cutoff = new Date(Date.now() - differenceInHours * 60 * 60 * 1000);
 
     const [stats] = await db
       .select({ count: count(apiUsage.id) })

@@ -97,17 +97,13 @@ export const Context = ({ className, apiUsage, ...props }: ContextProps) => {
           <div className="flex items-start justify-between text-sm">
             <span>{authLabel}</span>
             <span className="text-muted-foreground">
-              {hasMax
-                ? `${safeUsed} / ${max} 次`
-                : `${safeUsed} 次`}
+              {hasMax ? `${safeUsed} / ${max} 次` : `${safeUsed} 次`}
             </span>
           </div>
           <div className="space-y-2">
             <Progress className="h-2 bg-muted" value={usedPercent} />
           </div>
-          <div className="pt-1 text-xs text-muted-foreground">
-            每日调用次数
-          </div>
+          <div className="pt-1 text-muted-foreground text-xs">每日调用次数</div>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

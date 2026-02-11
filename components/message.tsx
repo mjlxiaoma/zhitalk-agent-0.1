@@ -268,7 +268,10 @@ const PurePreviewMessage = ({
 
               return (
                 <Tool defaultOpen={false} key={toolCallId}>
-                  <ToolHeader state={state} type="tool-getBehaviouralQuestions" />
+                  <ToolHeader
+                    state={state}
+                    type="tool-getBehaviouralQuestions"
+                  />
                   <ToolContent>
                     {state === "input-available" && (
                       <ToolInput input={part.input} />
@@ -282,7 +285,7 @@ const PurePreviewMessage = ({
                               获取行为面试题失败: {String(part.output.error)}
                             </div>
                           ) : (
-                            <div className="p-2 text-sm text-muted-foreground">
+                            <div className="p-2 text-muted-foreground text-sm">
                               已获取行为面试题（话题：{part.output.topic}）
                             </div>
                           )

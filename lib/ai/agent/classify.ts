@@ -65,34 +65,29 @@ const CLASSIFICATION_SYSTEM_PROMPT = `你是一个互联网大公司的资深程
 /**
  * 分类选项
  */
-export interface ClassifyUserIntentOptions {
+export type ClassifyUserIntentOptions = {
   /** 用户消息历史 */
   messages: ChatMessage[];
-  
+
   /** 使用的模型 ID */
   modelId?: ChatModel["id"];
-}
+};
 
 /**
  * 分类用户意图
- * 
+ *
  * 使用 AI 模型分析用户消息，判断用户的意图类型
- * 
+ *
  * @param options - 分类选项
  * @returns 分类结果（布尔值对象）
  */
 export async function classifyUserIntent(
   options: ClassifyUserIntentOptions
 ): Promise<ClassificationResult> {
-  const {
-    messages,
-    modelId = "chat-model",
-  } = options;
+  const { messages, modelId = "chat-model" } = options;
 
   // 提取最后一条用户消息作为分类依据
-  const lastUserMessage = messages
-    .filter((msg) => msg.role === "user")
-    .pop();
+  const lastUserMessage = messages.filter((msg) => msg.role === "user").pop();
 
   if (!lastUserMessage) {
     throw new Error("No user message found for classification");
@@ -117,7 +112,7 @@ export async function classifyUserIntent(
     return result.object;
   } catch (error) {
     console.error("Classification error:", error);
-    
+
     // 如果分类失败，返回默认分类（related_topics）
     return {
       resume_opt: false,
@@ -131,11 +126,21 @@ export async function classifyUserIntent(
 /**
  * 获取激活的意图类型
  */
-export function getActiveIntent(classification: ClassificationResult): string | null {
-  if (classification.resume_opt) return "resume_opt";
-  if (classification.mock_interview) return "mock_interview";
-  if (classification.related_topics) return "related_topics";
-  if (classification.others) return "others";
+export function getActiveIntent(
+  classification: ClassificationResult
+): string | null {
+  if (classification.resume_opt) {
+    return "resume_opt";
+  }
+  if (classification.mock_interview) {
+    return "mock_interview";
+  }
+  if (classification.related_topics) {
+    return "related_topics";
+  }
+  if (classification.others) {
+    return "others";
+  }
   return null;
 }
 

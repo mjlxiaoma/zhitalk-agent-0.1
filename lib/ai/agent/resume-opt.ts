@@ -1,6 +1,8 @@
-import { streamText, type CoreMessage } from "ai";
+import { type CoreMessage, streamText } from "ai";
 import { myProvider } from "@/lib/ai/providers";
 import { evaluateSkills } from "@/lib/ai/tools/evaluate-skills";
+
+const RESUME_CONTENT_REGEX = /简历|工作经验|项目经验|技术栈|教育背景/;
 
 const systemPrompt = `## 你的角色
 你是一位资深程序员 + 简历优化专家，拥有多年互联网大厂招聘和面试经验，最擅长程序员简历的评审和优化。
@@ -54,11 +56,11 @@ function hasResumeContent(messages: CoreMessage[]): boolean {
   const userMessages = messages.filter((m) => m.role === "user");
   return userMessages.some((m) => {
     const content = typeof m.content === "string" ? m.content : "";
-    return content.length > 200 || /简历|工作经验|项目经验|技术栈|教育背景/.test(content);
+    return content.length > 200 || RESUME_CONTENT_REGEX.test(content);
   });
 }
 
-export async function resumeOptAgent({
+export function resumeOptAgent({
   messages,
   model = "chat-model",
   onFinish,
@@ -74,7 +76,8 @@ export async function resumeOptAgent({
         ...messages,
         {
           role: "assistant" as const,
-          content: "请把你的简历文本内容粘贴到这里，我来帮你评审和优化。\n\n注意：\n- 内容要完整（教育背景、专业技能、工作经历、项目经验等）\n- 请隐藏个人隐私信息（姓名、手机号、邮箱、住址等）",
+          content:
+            "请把你的简历文本内容粘贴到这里，我来帮你评审和优化。\n\n注意：\n- 内容要完整（教育背景、专业技能、工作经历、项目经验等）\n- 请隐藏个人隐私信息（姓名、手机号、邮箱、住址等）",
         },
       ];
 

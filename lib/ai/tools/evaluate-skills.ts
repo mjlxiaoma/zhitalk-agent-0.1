@@ -29,10 +29,27 @@ function analyzeSkillDepth(skills: string[]): {
 } {
   // 高级技能关键词
   const advancedKeywords = [
-    "精通", "深入", "架构", "性能优化", "源码",
-    "底层", "原理", "设计模式", "微服务", "分布式",
-    "高并发", "大数据", "机器学习", "AI", "算法",
-    "安全", "DevOps", "CI/CD", "容器化", "K8s", "Kubernetes"
+    "精通",
+    "深入",
+    "架构",
+    "性能优化",
+    "源码",
+    "底层",
+    "原理",
+    "设计模式",
+    "微服务",
+    "分布式",
+    "高并发",
+    "大数据",
+    "机器学习",
+    "AI",
+    "算法",
+    "安全",
+    "DevOps",
+    "CI/CD",
+    "容器化",
+    "K8s",
+    "Kubernetes",
   ];
 
   // 熟练程度关键词
@@ -43,8 +60,8 @@ function analyzeSkillDepth(skills: string[]): {
   const advancedSkills: string[] = [];
 
   for (const skill of skills) {
-    const hasAdvanced = advancedKeywords.some(kw => skill.includes(kw));
-    const hasProficient = proficientKeywords.some(kw => skill.includes(kw));
+    const hasAdvanced = advancedKeywords.some((kw) => skill.includes(kw));
+    const hasProficient = proficientKeywords.some((kw) => skill.includes(kw));
 
     if (hasAdvanced) {
       advancedCount++;
@@ -57,7 +74,8 @@ function analyzeSkillDepth(skills: string[]): {
 
   // 深度得分（满分 2.5 分）
   const advancedRatio = skills.length > 0 ? advancedCount / skills.length : 0;
-  const proficientRatio = skills.length > 0 ? proficientCount / skills.length : 0;
+  const proficientRatio =
+    skills.length > 0 ? proficientCount / skills.length : 0;
 
   const depthScore = Math.min(advancedRatio * 3 + proficientRatio * 1.5, 2.5);
 
@@ -77,19 +95,70 @@ function analyzeSkillBreadth(skills: string[]): {
 } {
   // 技术领域分类
   const domains: Record<string, string[]> = {
-    "前端": ["React", "Vue", "Angular", "HTML", "CSS", "JavaScript", "TypeScript", "小程序", "Webpack", "Vite", "Next", "Nuxt"],
-    "后端": ["Node", "Java", "Python", "Go", "PHP", "Spring", "Django", "Express", "Nest", "Koa"],
-    "数据库": ["MySQL", "PostgreSQL", "MongoDB", "Redis", "Oracle", "SQL", "数据库"],
-    "移动端": ["iOS", "Android", "Flutter", "React Native", "Swift", "Kotlin", "App"],
-    "运维/云": ["Linux", "Docker", "K8s", "Kubernetes", "AWS", "阿里云", "腾讯云", "CI/CD", "Jenkins", "Nginx"],
+    前端: [
+      "React",
+      "Vue",
+      "Angular",
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "TypeScript",
+      "小程序",
+      "Webpack",
+      "Vite",
+      "Next",
+      "Nuxt",
+    ],
+    后端: [
+      "Node",
+      "Java",
+      "Python",
+      "Go",
+      "PHP",
+      "Spring",
+      "Django",
+      "Express",
+      "Nest",
+      "Koa",
+    ],
+    数据库: [
+      "MySQL",
+      "PostgreSQL",
+      "MongoDB",
+      "Redis",
+      "Oracle",
+      "SQL",
+      "数据库",
+    ],
+    移动端: [
+      "iOS",
+      "Android",
+      "Flutter",
+      "React Native",
+      "Swift",
+      "Kotlin",
+      "App",
+    ],
+    "运维/云": [
+      "Linux",
+      "Docker",
+      "K8s",
+      "Kubernetes",
+      "AWS",
+      "阿里云",
+      "腾讯云",
+      "CI/CD",
+      "Jenkins",
+      "Nginx",
+    ],
     "工具/其他": ["Git", "测试", "敏捷", "Scrum", "产品", "项目管理"],
   };
 
   const coveredDomains: string[] = [];
-  const skillsLower = skills.map(s => s.toLowerCase()).join(" ");
+  const skillsLower = skills.map((s) => s.toLowerCase()).join(" ");
 
   for (const [domain, keywords] of Object.entries(domains)) {
-    const hasDomain = keywords.some(kw =>
+    const hasDomain = keywords.some((kw) =>
       skillsLower.includes(kw.toLowerCase())
     );
     if (hasDomain) {
@@ -154,16 +223,14 @@ function checkExperienceMatch(
       feedback = "工作 3 年以上应体现技术深度，建议补充精通/深入的技能描述";
       score = 1.5;
     }
-  } else {
+  } else if (!hasAdvanced) {
     // 5年以上：应有技术专长和广度
-    if (!hasAdvanced) {
-      isMatched = false;
-      feedback = "资深工程师应有明确的技术专长，建议突出核心竞争力";
-      score = 1.0;
-    } else if (depthAnalysis.advancedSkills.length < 2) {
-      feedback = "建议增加更多深度技能，体现技术积累";
-      score = 2.0;
-    }
+    isMatched = false;
+    feedback = "资深工程师应有明确的技术专长，建议突出核心竞争力";
+    score = 1.0;
+  } else if (depthAnalysis.advancedSkills.length < 2) {
+    feedback = "建议增加更多深度技能，体现技术积累";
+    score = 2.0;
   }
 
   return { score, isMatched, feedback };
@@ -172,13 +239,21 @@ function checkExperienceMatch(
 /**
  * 生成综合建议
  */
-function generateSuggestion(
-  yearsOfExperience: number,
-  skills: string[],
-  depthAnalysis: ReturnType<typeof analyzeSkillDepth>,
-  breadthAnalysis: ReturnType<typeof analyzeSkillBreadth>,
-  matchAnalysis: ReturnType<typeof checkExperienceMatch>
-): string {
+type SuggestionInputs = {
+  yearsOfExperience: number;
+  skills: string[];
+  depthAnalysis: ReturnType<typeof analyzeSkillDepth>;
+  breadthAnalysis: ReturnType<typeof analyzeSkillBreadth>;
+  matchAnalysis: ReturnType<typeof checkExperienceMatch>;
+};
+
+function generateSuggestion({
+  yearsOfExperience,
+  skills,
+  depthAnalysis,
+  breadthAnalysis,
+  matchAnalysis,
+}: SuggestionInputs): string {
   const suggestions: string[] = [];
 
   // 匹配度建议
@@ -193,7 +268,9 @@ function generateSuggestion(
 
   // 广度建议
   if (breadthAnalysis.coveredDomains.length < 2) {
-    suggestions.push("技能领域覆盖较窄，可考虑补充相关领域技能（如数据库、运维等）");
+    suggestions.push(
+      "技能领域覆盖较窄，可考虑补充相关领域技能（如数据库、运维等）"
+    );
   }
 
   // 数量建议
@@ -204,7 +281,7 @@ function generateSuggestion(
   }
 
   // 格式建议
-  const hasUnderstand = skills.some(s => s.includes("了解"));
+  const hasUnderstand = skills.some((s) => s.includes("了解"));
   if (hasUnderstand) {
     suggestions.push("不建议写了解xx技术，要么写熟悉，要么不写");
   }
@@ -223,14 +300,14 @@ function generateSuggestion(
 export const evaluateSkills = tool({
   description: "评估简历中的专业技能部分，根据毕业时间和技能列表进行评分和建议",
   inputSchema: z.object({
-    graduationYear: z
-      .number()
-      .describe("毕业年份，如 2020"),
+    graduationYear: z.number().describe("毕业年份，如 2020"),
     skills: z
       .array(z.string())
-      .describe("技能列表，如 ['熟悉 React', '熟练使用 TypeScript', '了解 Node.js']"),
+      .describe(
+        "技能列表，如 ['熟悉 React', '熟练使用 TypeScript', '了解 Node.js']"
+      ),
   }),
-  execute: async ({ graduationYear, skills }) => {
+  execute: ({ graduationYear, skills }) => {
     // 计算工作年限
     const currentYear = new Date().getFullYear();
     const yearsOfExperience = Math.max(0, currentYear - graduationYear);
@@ -239,21 +316,30 @@ export const evaluateSkills = tool({
     const baseScore = calculateBaseScore(yearsOfExperience, skills.length);
     const depthAnalysis = analyzeSkillDepth(skills);
     const breadthAnalysis = analyzeSkillBreadth(skills);
-    const matchAnalysis = checkExperienceMatch(yearsOfExperience, skills, depthAnalysis);
+    const matchAnalysis = checkExperienceMatch(
+      yearsOfExperience,
+      skills,
+      depthAnalysis
+    );
 
     // 计算总分（5-10分）
     // 基础分 5 分 + 各维度加分（最多 5 分）
-    const rawScore = 5 + baseScore + depthAnalysis.score + breadthAnalysis.score + matchAnalysis.score;
+    const rawScore =
+      5 +
+      baseScore +
+      depthAnalysis.score +
+      breadthAnalysis.score +
+      matchAnalysis.score;
     const score = Math.min(Math.max(Math.round(rawScore * 10) / 10, 5), 10);
 
     // 生成建议
-    const suggestion = generateSuggestion(
+    const suggestion = generateSuggestion({
       yearsOfExperience,
       skills,
       depthAnalysis,
       breadthAnalysis,
-      matchAnalysis
-    );
+      matchAnalysis,
+    });
 
     return {
       score,

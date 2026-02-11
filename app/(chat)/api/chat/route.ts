@@ -5,11 +5,11 @@ import type { VisibilityType } from "@/components/visibility-selector";
 import { createChatStream } from "@/lib/ai/agent";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
-import { type RequestHints } from "@/lib/ai/prompts";
+import type { RequestHints } from "@/lib/ai/prompts";
 import {
   deleteChatById,
-  getChatById,
   getApiUsageCountByUserId,
+  getChatById,
   getMessagesByChatId,
   recordApiUsage,
   saveChat,
@@ -61,8 +61,7 @@ export async function POST(request: Request) {
       endpoint: "chat",
       differenceInHours: 24,
     });
-    console.log(messageCount,'messageCount');
-    
+    console.log(messageCount, "messageCount");
 
     if (messageCount >= entitlementsByUserType[userType].maxApiCallsPerDay) {
       return new ChatSDKError("rate_limit:chat").toResponse();
@@ -76,7 +75,8 @@ export async function POST(request: Request) {
     const chat = await getChatById({ id });
     let messagesFromDb: DBMessage[] = [];
 
-    if (chat) { // 查询当前聊天记录是否存在，如果不存在就生成一个title并创建一个聊天记录
+    if (chat) {
+      // 查询当前聊天记录是否存在，如果不存在就生成一个title并创建一个聊天记录
       if (chat.userId !== session.user.id) {
         return new ChatSDKError("forbidden:chat").toResponse();
       }
@@ -87,7 +87,8 @@ export async function POST(request: Request) {
         message,
       });
 
-      await saveChat({  // 往数据表中插入一行数据
+      await saveChat({
+        // 往数据表中插入一行数据
         id,
         userId: session.user.id,
         title,
@@ -121,7 +122,7 @@ export async function POST(request: Request) {
     });
 
     // Create AI chat stream
-    const { stream } = await createChatStream({
+    const { stream } = createChatStream({
       selectedChatModel,
       messages: uiMessages,
       session,

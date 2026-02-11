@@ -70,14 +70,14 @@ async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
 
   return (
     <>
-        <Chat
-          autoResume={true}
-          id={chat.id}
-          initialChatModel={chatModelFromCookie.value}
-          initialMessages={uiMessages}
-          initialVisibilityType={chat.visibility}
-          isReadonly={session?.user?.id !== chat.userId}
-        />
+      <Chat
+        autoResume={true}
+        id={chat.id}
+        initialChatModel={chatModelFromCookie.value}
+        initialMessages={uiMessages}
+        initialVisibilityType={chat.visibility}
+        isReadonly={session?.user?.id !== chat.userId}
+      />
       <DataStreamHandler />
     </>
   );

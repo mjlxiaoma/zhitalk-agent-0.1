@@ -21,8 +21,7 @@ import { useLocalStorage, useWindowSize } from "usehooks-ts";
 import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { SelectItem } from "@/components/ui/select";
 import { chatModels } from "@/lib/ai/models";
-import type { Attachment, ChatMessage } from "@/lib/types";
-import type { ApiUsageSummary } from "@/lib/types";
+import type { ApiUsageSummary, Attachment, ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Context } from "./elements/context";
 import {
@@ -448,7 +447,7 @@ function PureAttachmentsButton({
   );
 }
 
-const AttachmentsButton = memo(PureAttachmentsButton);
+const _AttachmentsButton = memo(PureAttachmentsButton);
 
 function PureModelSelectorCompact({
   selectedModelId,

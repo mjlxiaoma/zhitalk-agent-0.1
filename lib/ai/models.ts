@@ -6,7 +6,8 @@ export type ChatModel = {
   description: string;
 };
 
-export const chatModels: ChatModel[] = [ //输入框左下角模型
+export const chatModels: ChatModel[] = [
+  //输入框左下角模型
   {
     id: "chat-model",
     name: "DeepSeek Chat",

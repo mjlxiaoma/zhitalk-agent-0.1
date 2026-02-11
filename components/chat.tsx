@@ -22,8 +22,7 @@ import { useAutoResume } from "@/hooks/use-auto-resume";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import type { Vote } from "@/lib/db/schema";
 import { ChatSDKError } from "@/lib/errors";
-import type { Attachment, ChatMessage } from "@/lib/types";
-import type { ApiUsageSummary } from "@/lib/types";
+import type { ApiUsageSummary, Attachment, ChatMessage } from "@/lib/types";
 import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
 import { Artifact } from "./artifact";
 import { useDataStream } from "./data-stream-provider";
@@ -155,10 +154,7 @@ export function Chat({
 
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
-  const { data: apiUsage } = useSWR<ApiUsageSummary>(
-    "/api/usage",
-    fetcher
-  );
+  const { data: apiUsage } = useSWR<ApiUsageSummary>("/api/usage", fetcher);
 
   useAutoResume({
     autoResume,
@@ -191,6 +187,7 @@ export function Chat({
         <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
           {!isReadonly && (
             <MultimodalInput
+              apiUsage={apiUsage}
               attachments={attachments}
               chatId={id}
               input={input}
@@ -198,7 +195,6 @@ export function Chat({
               onModelChange={setCurrentModelId}
               selectedModelId={currentModelId}
               selectedVisibilityType={visibilityType}
-              apiUsage={apiUsage}
               sendMessage={sendMessage}
               setAttachments={setAttachments}
               setInput={setInput}
