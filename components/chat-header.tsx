@@ -60,7 +60,7 @@ function PureChatHeader({
           target="_noblank"
         >
           <VercelIcon size={16} />
-          Deploy with Vercel
+          学习该项目
         </Link>
       </Button>
     </header>
