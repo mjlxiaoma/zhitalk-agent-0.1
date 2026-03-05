@@ -29,14 +29,22 @@ export default function HomePage() {
               AI 简历官
             </span>
           </Link>
-          <Link
-            href="/chat"
-            className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/50 transition-all text-sm font-medium overflow-hidden"
-          >
-            <span className="relative z-10">开始试用</span>
-            <ArrowRight className="size-4 relative z-10 group-hover:translate-x-1 transition-transform" />
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="px-4 py-2 rounded-full text-sm font-medium text-foreground hover:bg-muted transition-colors"
+            >
+              登录
+            </Link>
+            <Link
+              href="/chat"
+              className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/50 transition-all text-sm font-medium overflow-hidden"
+            >
+              <span className="relative z-10">开始试用</span>
+              <ArrowRight className="size-4 relative z-10 group-hover:translate-x-1 transition-transform" />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </Link>
+          </div>
         </div>
       </header>
 
