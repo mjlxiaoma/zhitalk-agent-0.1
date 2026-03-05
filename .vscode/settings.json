@@ -32,5 +32,7 @@
     "source.fixAll.biome": "explicit",
     "source.organizeImports.biome": "explicit"
   },
-  "cSpell.words": ["DEEPSEEK"]
+  "cSpell.words": [
+    "DEEPSEEK"
+  ]
 }

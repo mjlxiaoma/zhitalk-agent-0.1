@@ -1,10 +1,10 @@
 <a href="https://chat.vercel.ai/">
   <img alt="Next.js 14 and App Router-ready AI chatbot." src="app/(chat)/opengraph-image.png">
-  <h1 align="center">Chat SDK</h1>
+  <h1 align="center">AI 智能面试官</h1>
 </a>
 
 <p align="center">
-    Chat SDK is a free, open-source template built with Next.js and the AI SDK that helps you quickly build powerful chatbot applications.
+    基于 Vercel AI Chatbot 开发的 AI 智能面试官，专注编程领域（尤其前端开发），提供简历优化、模拟面试、面试题解答等功能。
 </p>
 
 <p align="center">
@@ -16,7 +16,13 @@
 </p>
 <br/>
 
-## Features
+## 核心功能
+
+- **简历优化**: AI 深度分析简历，提供专业的优化建议
+- **模拟面试**: 真实还原面试场景，提供针对性的面试问题
+- **面试题解答**: 覆盖前端开发各个领域的面试题库，详细解析
+
+## 技术栈
 
 - [Next.js](https://nextjs.org) App Router
   - Advanced routing for seamless navigation and performance
@@ -33,6 +39,14 @@
   - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
 - [Auth.js](https://authjs.dev)
   - Simple and secure authentication
+
+## 页面结构
+
+- `/` - 首页：展示产品功能和 GIF 演示
+- `/chat` - 聊天页面：与 AI 面试官对话
+- `/chat/[id]` - 特定对话页面
+
+详细的首页使用指南请查看 [HOMEPAGE_GUIDE.md](./HOMEPAGE_GUIDE.md)
 
 ## Model Providers
 
