@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useActionState, useEffect, useState } from "react";
 import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
@@ -13,6 +13,7 @@ export default function Page() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
 
   const [state, formAction] = useActionState<RegisterActionState, FormData>(
@@ -22,30 +23,58 @@ export default function Page() {
     }
   );
 
-  const { update: updateSession } = useSession();
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: router and updateSession are stable refs
+  // biome-ignore lint/correctness/useExhaustiveDependencies: router is stable ref
   useEffect(() => {
     if (state.status === "user_exists") {
-      toast({ type: "error", description: "Account already exists!" });
+      toast({ type: "error", description: "该邮箱已被注册，请直接登录或使用其他邮箱！" });
     } else if (state.status === "failed") {
-      toast({ type: "error", description: "Failed to create account!" });
+      toast({ type: "error", description: "注册失败，请稍后重试！" });
     } else if (state.status === "invalid_data") {
       toast({
         type: "error",
-        description: "Failed validating your submission!",
+        description: "请输入有效的邮箱和密码（密码至少6位）！",
       });
     } else if (state.status === "success") {
-      toast({ type: "success", description: "Account created successfully!" });
-
+      console.log("Registration successful, email:", email, "password length:", password?.length);
+      toast({ type: "success", description: "注册成功！正在为您登录..." });
       setIsSuccessful(true);
-      updateSession();
-      router.refresh();
+      
+      // 在客户端登录
+      const doSignIn = async () => {
+        try {
+          console.log("Attempting to sign in...");
+          const result = await signIn("credentials", {
+            email,
+            password,
+            redirect: false,
+          });
+
+          console.log("Sign in result:", result);
+
+          if (result?.error) {
+            console.error("Sign in error:", result.error);
+            toast({ type: "error", description: "自动登录失败，请手动登录！" });
+            // 即使登录失败，也跳转到登录页
+            router.push("/login");
+          } else {
+            console.log("Sign in successful, redirecting to chat...");
+            // 登录成功，跳转到聊天页面
+            router.push("/chat");
+          }
+        } catch (error) {
+          console.error("Sign in exception:", error);
+          toast({ type: "error", description: "自动登录失败，请手动登录！" });
+          router.push("/login");
+        }
+      };
+      
+      doSignIn();
     }
-  }, [state.status]);
+  }, [state.status, router, email, password]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);
+    setPassword(formData.get("password") as string);
     formAction(formData);
   };
 
@@ -90,12 +119,14 @@ export default function Page() {
             <SubmitButton isSuccessful={isSuccessful}>注册</SubmitButton>
             <p className="mt-6 text-center text-muted-foreground text-sm">
               已有账户？{" "}
-              <Link
-                className="font-semibold text-purple-600 dark:text-purple-400 hover:underline hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
+              <a
                 href="/login"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-purple-600 dark:text-purple-400 hover:underline hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
               >
                 立即登录
-              </Link>
+              </a>
             </p>
           </AuthForm>
         </div>

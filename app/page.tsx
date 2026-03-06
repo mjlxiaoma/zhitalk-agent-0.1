@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles, FileText, MessageSquare, Target, CheckCircle2, Zap, Users, TrendingUp } from "lucide-react";
 import { GifShowcase } from "@/components/gif-showcase";
+import { auth } from "@/app/(auth)/auth";
 
 export const metadata = {
   title: "AI 智能面试官 - 简历优化、模拟面试、面试题解答",
   description: "专注编程领域的 AI 智能面试官，提供简历优化、模拟面试、面试题解答等功能，助你在求职路上更进一步",
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await auth();
+  
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* 背景装饰 */}
@@ -30,20 +33,38 @@ export default function HomePage() {
             </span>
           </Link>
           <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="px-4 py-2 rounded-full text-sm font-medium text-foreground hover:bg-muted transition-colors"
-            >
-              登录
-            </Link>
-            <Link
-              href="/chat"
-              className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/50 transition-all text-sm font-medium overflow-hidden"
-            >
-              <span className="relative z-10">开始试用</span>
-              <ArrowRight className="size-4 relative z-10 group-hover:translate-x-1 transition-transform" />
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </Link>
+            {session?.user ? (
+              <>
+                <span className="text-sm text-muted-foreground hidden sm:inline">
+                  {session.user.email}
+                </span>
+                <Link
+                  href="/chat"
+                  className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/50 transition-all text-sm font-medium overflow-hidden"
+                >
+                  <span className="relative z-10">进入聊天</span>
+                  <ArrowRight className="size-4 relative z-10 group-hover:translate-x-1 transition-transform" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 rounded-full text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                >
+                  登录
+                </Link>
+                <Link
+                  href="/chat"
+                  className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/50 transition-all text-sm font-medium overflow-hidden"
+                >
+                  <span className="relative z-10">开始试用</span>
+                  <ArrowRight className="size-4 relative z-10 group-hover:translate-x-1 transition-transform" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>

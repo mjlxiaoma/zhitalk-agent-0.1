@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useActionState, useEffect, useState } from "react";
 
 import { AuthForm } from "@/components/auth-form";
@@ -23,26 +22,27 @@ export default function Page() {
     }
   );
 
-  const { update: updateSession } = useSession();
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: router and updateSession are stable refs
   useEffect(() => {
     if (state.status === "failed") {
       toast({
         type: "error",
-        description: "Invalid credentials!",
+        description: "邮箱或密码错误，请检查后重试！",
       });
     } else if (state.status === "invalid_data") {
       toast({
         type: "error",
-        description: "Failed validating your submission!",
+        description: "请输入有效的邮箱和密码（密码至少6位）！",
       });
     } else if (state.status === "success") {
       setIsSuccessful(true);
-      updateSession();
-      router.refresh();
+      
+      // 延迟跳转到聊天页面
+      setTimeout(() => {
+        router.push("/chat");
+      }, 500);
     }
-  }, [state.status]);
+  }, [state.status, router]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);
@@ -90,12 +90,13 @@ export default function Page() {
             <SubmitButton isSuccessful={isSuccessful}>登录</SubmitButton>
             <p className="mt-6 text-center text-muted-foreground text-sm">
               还没有账户？{" "}
-              <Link
-                className="font-semibold text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-                href="/register"
+              <button
+                type="button"
+                onClick={() => router.push("/register")}
+                className="font-semibold text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors cursor-pointer bg-transparent border-none"
               >
                 免费注册
-              </Link>
+              </button>
             </p>
           </AuthForm>
         </div>
